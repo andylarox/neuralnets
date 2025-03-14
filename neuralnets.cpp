@@ -1,13 +1,11 @@
-// neuralnets.cpp 
-//
 /**
- * @file artificial_neuron.cpp
- * @brief Implements an artificial neuron.
+ * @file neuralnets.cpp
+ * @brief Implements an artificial neuron and demonstrates a simple feedforward network.
  *
- * Defines a Neuron class that simulates an artificial neuron using a selectable
- * activation function. 
+ * Defines the member functions of the Neuron class and the main entry point of the programme.
  */
 
+#include "neuron.h"
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -15,146 +13,89 @@
 #include <ctime>
 #include <string>
 
- /**
-  * @enum ActivationType
-  * @brief Defines the types of activation functions available for the neuron.
-  */
-enum ActivationType {
-    SIGMOID,     ///< Sigmoid activation function.
-    TANH,        ///< Hyperbolic tangent activation function.
-    RELU,        ///< Rectified Linear Unit activation function.
-    LEAKY_RELU,  ///< Leaky Rectified Linear Unit activation function.
-    LINEAR       ///< Linear activation function.
-};
+ //------------------------------------------------------------------------------
+ // Neuron class member function definitions
+ //------------------------------------------------------------------------------
 
-/**
- * @class Neuron
- * @brief An artificial neuron.
- *
- * The Neuron class encapsulates the weights, bias, and activation function required to compute the
- * output from an input vector. The weights and bias are initialised randomly upon object
- * construction.
- */
-class Neuron {
-public:
-    /**
-     * @brief Constructs a Neuron with a specified number of inputs and an activation type.
-     *
-     * This constructor initialises the weights and bias with random values in the range [-1, 1]. The
-     * default activation function is SIGMOID if none is specified.
-     *
-     * @param numInputs The number of input connections to the neuron.
-     * @param actType The activation function type to be used (default is SIGMOID).
-     */
-    Neuron(int numInputs, ActivationType actType = SIGMOID)
-        : weights(numInputs), bias(0.0), activationType(actType) {
-        // Randomly initialise weights and bias.
-        for (auto& weight : weights) {
-            // Random value between -1 and 1.
-            weight = ((double)rand() / RAND_MAX) * 2.0 - 1.0;
-        }
-        bias = ((double)rand() / RAND_MAX) * 2.0 - 1.0;
+Neuron::Neuron(int numInputs, ActivationType actType)
+    : weights(numInputs), bias(0.0), activationType(actType) {
+    // Randomly initialise weights and bias.
+    for (auto& weight : weights) {
+        // Random value between -1 and 1.
+        weight = ((double)rand() / RAND_MAX) * 2.0 - 1.0;
     }
+    bias = ((double)rand() / RAND_MAX) * 2.0 - 1.0;
+}
 
-    /**
-     * @brief Applies the selected activation function to a given input value.
-     *
-     * This function calculates the output of the chosen activation function for a given input.
-     *
-     * @param x The input value.
-     * @return The activated value.
-     */
-    double activate(double x) {
-        switch (activationType) {
-        case SIGMOID:
-            return 1.0 / (1.0 + std::exp(-x));
-        case TANH:
-            return std::tanh(x);
-        case RELU:
-            return (x > 0) ? x : 0.0;
-        case LEAKY_RELU:
-            return (x > 0) ? x : 0.01 * x;
-        case LINEAR:
-            return x;
-        default:
-            return x; // Fallback to linear activation.
-        }
+double Neuron::activate(double x) {
+    switch (activationType) {
+    case SIGMOID:
+        return 1.0 / (1.0 + std::exp(-x));
+    case TANH:
+        return std::tanh(x);
+    case RELU:
+        return (x > 0) ? x : 0.0;
+    case LEAKY_RELU:
+        return (x > 0) ? x : 0.01 * x;
+    case LINEAR:
+        return x;
+    default:
+        return x; // Fallback to linear activation.
     }
+}
 
-    /**
-     * @brief Computes the output of the neuron given an input vector.
-     *
-     * The output is computed as the activation of the weighted sum of the inputs plus the bias.
-     *
-     * @param inputs A vector of input values.
-     * @return The output of the neuron.
-     */
-    double forward(const std::vector<double>& inputs) {
-        // Verify that the input size matches the number of weights.
-        if (inputs.size() != weights.size()) {
-            std::cerr << "Error: Input size does not match number of weights." << std::endl;
-            return 0.0;
-        }
-        double sum = bias;
-        // Compute the weighted sum.
-        for (std::size_t i = 0; i < weights.size(); i++) {
-            sum += weights[i] * inputs[i];
-        }
-        // Apply the selected activation function.
-        return activate(sum);
+double Neuron::forward(const std::vector<double>& inputs) {
+    // Verify that the input size matches the number of weights.
+    if (inputs.size() != weights.size()) {
+        std::cerr << "Error: Input size does not match number of weights." << std::endl;
+        return 0.0;
     }
-
-    /**
-     * @brief Prints the neuron's parameters to the standard output.
-     *
-     * Outputs the current weights, bias, and the selected activation function being used.
-     */
-    void printParameters() const {
-        std::cout << "Weights: ";
-        for (const auto& w : weights)
-            std::cout << w << " ";
-        std::cout << "\nBias: " << bias << std::endl;
-        std::cout << "Activation Function: " << activationTypeToString() << std::endl;
+    double sum = bias;
+    // Compute the weighted sum.
+    for (std::size_t i = 0; i < weights.size(); i++) {
+        sum += weights[i] * inputs[i];
     }
+    // Apply the selected activation function.
+    return activate(sum);
+}
 
-    /**
-     * @brief Sets the activation function type for the neuron.
-     *
-     * Allows changing the activation function type for the neuron.
-     *
-     * @param actType The new activation function type.
-     */
-    void setActivationType(ActivationType actType) {
-        activationType = actType;
+void Neuron::printParameters() const {
+    std::cout << "Weights: ";
+    for (const auto& w : weights)
+        std::cout << w << " ";
+    std::cout << "\nBias: " << bias << std::endl;
+    std::cout << "Activation Function: " << activationTypeToString() << std::endl;
+}
+
+void Neuron::setActivationType(ActivationType actType) {
+    activationType = actType;
+}
+
+std::string Neuron::activationTypeToString() const {
+    switch (activationType) {
+    case SIGMOID: return "Sigmoid";
+    case TANH: return "Tanh";
+    case RELU: return "ReLU";
+    case LEAKY_RELU: return "Leaky ReLU";
+    case LINEAR: return "Linear";
+    default: return "Unknown";
     }
+}
 
-private:
-    std::vector<double> weights;   ///< The weights associated with each input.
-    double bias;                   ///< The bias term.
-    ActivationType activationType; ///< The type of activation function to apply.
-
-    /**
-     * @brief Converts the activation type to a string representation.
-     *
-     * @return A string that represents the activation function type.
-     */
-    std::string activationTypeToString() const {
-        switch (activationType) {
-        case SIGMOID: return "Sigmoid";
-        case TANH: return "Tanh";
-        case RELU: return "ReLU";
-        case LEAKY_RELU: return "Leaky ReLU";
-        case LINEAR: return "Linear";
-        default: return "Unknown";
-        }
-    }
-};
+//------------------------------------------------------------------------------
+// Main entry point
+//------------------------------------------------------------------------------
 
 /**
  * @brief Main entry point
  *
- * Seeds the rng, creates Neuron objects with different
- * activation functions, prints their parameters, and computes the output for a sample input vector.
+ * Seeds the rng, creates Neuron objects with different activation functions, prints their parameters,
+ * and computes the output for a sample input vector.
+ *
+ * The network architecture is as follows:
+ * - 3 input nodes.
+ * - Hidden layer: 2 neurons, each receiving 3 inputs.
+ * - Output layer: 1 neuron receiving 2 inputs (the outputs from the hidden neurons).
  *
  * @return 0 on successful execution.
  */
@@ -162,36 +103,32 @@ int main() {
     // Seed the random number generator.
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    // Example input vector.
+    // Example input vector with 3 values.
     std::vector<double> input = { 0.5, -0.3, 0.8 };
 
-    // Create neurons with different activation functions.
-    Neuron sigmoidNeuron(3, SIGMOID);
-    Neuron tanhNeuron(3, TANH);
-    Neuron reluNeuron(3, RELU);
-    Neuron leakyReluNeuron(3, LEAKY_RELU);
-    Neuron linearNeuron(3, LINEAR);
+    // Create the hidden layer with 2 neurons.
+    // Each hidden neuron receives 3 inputs.
+    Neuron hiddenNeuron1(3, SIGMOID);
+    Neuron hiddenNeuron2(3, SIGMOID);
 
-    // Print parameters and outputs for each neuron.
-    std::cout << "Sigmoid Neuron:" << std::endl;
-    sigmoidNeuron.printParameters();
-    std::cout << "Output: " << sigmoidNeuron.forward(input) << "\n\n";
+    // Compute the outputs of the hidden neurons.
+    double hiddenOutput1 = hiddenNeuron1.forward(input);
+    double hiddenOutput2 = hiddenNeuron2.forward(input);
 
-    std::cout << "Tanh Neuron:" << std::endl;
-    tanhNeuron.printParameters();
-    std::cout << "Output: " << tanhNeuron.forward(input) << "\n\n";
+    // Display hidden layer outputs.
+    std::cout << "Hidden Neuron 1 output: " << hiddenOutput1 << std::endl;
+    std::cout << "Hidden Neuron 2 output: " << hiddenOutput2 << std::endl;
 
-    std::cout << "ReLU Neuron:" << std::endl;
-    reluNeuron.printParameters();
-    std::cout << "Output: " << reluNeuron.forward(input) << "\n\n";
+    // Create the output layer neuron.
+    // The output neuron receives 2 inputs (the outputs from the hidden layer).
+    Neuron outputNeuron(2, SIGMOID);
 
-    std::cout << "Leaky ReLU Neuron:" << std::endl;
-    leakyReluNeuron.printParameters();
-    std::cout << "Output: " << leakyReluNeuron.forward(input) << "\n\n";
+    // Prepare the vector of hidden layer outputs.
+    std::vector<double> hiddenOutputs = { hiddenOutput1, hiddenOutput2 };
 
-    std::cout << "Linear Neuron:" << std::endl;
-    linearNeuron.printParameters();
-    std::cout << "Output: " << linearNeuron.forward(input) << "\n\n";
+    // Compute the output of the network.
+    double networkOutput = outputNeuron.forward(hiddenOutputs);
+    std::cout << "Network output: " << networkOutput << std::endl;
 
     return 0;
 }

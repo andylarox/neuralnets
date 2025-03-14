@@ -1,5 +1,5 @@
-#ifndef ARTIFICIAL_NEURON_H
-#define ARTIFICIAL_NEURON_H
+#ifndef NEURON_H
+#define NEURON_H
 
 #include <vector>
 #include <string>
@@ -51,6 +51,7 @@ public:
      * @brief Computes the output of the neuron given an input vector.
      *
      * The output is computed as the activation of the weighted sum of the inputs plus the bias.
+     * Additionally, the input, weighted sum, and output are stored for use in backpropagation.
      *
      * @param inputs A vector of input values.
      * @return The output of the neuron.
@@ -73,10 +74,32 @@ public:
      */
     void setActivationType(ActivationType actType);
 
+    /**
+     * @brief Computes the derivative of the activation function at the last computed weighted sum.
+     *
+     * This function utilises the stored output from the last forward pass.
+     *
+     * @return The derivative of the activation function.
+     */
+    double activationDerivative() const;
+
+    /**
+     * @brief Updates the weights and bias based on the computed delta and learning rate.
+     *
+     * @param delta The error term (gradient) for this neuron.
+     * @param learningRate The learning rate for the update.
+     */
+    void updateWeights(double delta, double learningRate);
+
 private:
     std::vector<double> weights;   ///< The weights associated with each input.
     double bias;                   ///< The bias term.
     ActivationType activationType; ///< The type of activation function to apply.
+
+    // Variables to store forward pass values for use in backpropagation.
+    std::vector<double> lastInputs;   ///< The last input vector.
+    double lastWeightedSum;           ///< The weighted sum before activation.
+    double lastOutput;                ///< The output after activation.
 
     /**
      * @brief Converts the activation type to a string representation.
@@ -86,4 +109,4 @@ private:
     std::string activationTypeToString() const;
 };
 
-#endif // ARTIFICIAL_NEURON_H
+#endif // NEURON_H
